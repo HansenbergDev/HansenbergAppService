@@ -1,3 +1,5 @@
+// From: https://www.section.io/engineering-education/how-to-build-authentication-api-with-jwt-token-in-nodejs/
+
 const http = require("http");
 const app = require("./app");
 const server = http.createServer(app);

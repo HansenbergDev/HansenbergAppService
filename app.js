@@ -16,14 +16,20 @@ const pool = new Pool({
 
 app.use(express.json());
 
+function decodeToken(req) {
+    return jwt.verify(req.headers["x-access-token"], process.env.TOKEN_KEY);
+}
+
 app.post("/student/register", async (req, res) => {
     try {
         const { name, enrolled_from, enrolled_to } = req.body;
 
-        // TODO: Check at enrolled_from er mindre en enrolled_to
-
         if (!(name && enrolled_from && enrolled_to)) {
             return res.status(400).send("All input is required");
+        }
+
+        if (Date.parse(enrolled_from) > Date.parse(enrolled_to)) {
+            return res.status(400).send("enrolled_to must be greater than enrolled_from");
         }
 
         let id;
@@ -38,34 +44,132 @@ app.post("/student/register", async (req, res) => {
                 return res.status(400).send()
             })
 
-
         const signed_token = jwt.sign(
-            {student_id: id, student_name: name},
+            {id: id, stuff: Math.random()},
             process.env.TOKEN_KEY
         );
 
-        let final_result
-
-        await pool.query('UPDATE students SET token = $1::varchar WHERE id = $2::integer RETURNING token',
+        await pool.query('UPDATE students SET token = $1::varchar WHERE id = $2::integer',
             [signed_token, id])
-            .then((result) => {
-                final_result = result.rows[0].token;
-            })
             .catch((error) => {
                 console.error('Error executing query', error.stack);
                 return res.status(400).send()
             })
 
-
-        return res.status(201).json({student_id: id, token: signed_token})
+        return res.status(201).json({token: signed_token})
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 })
 
-app.get("/welcome", auth, async (req, res) => {
-    res.status(200).send("Welcome!");
+app.get("/student", auth, async (req, res) => {
+    const decoded_token = decodeToken(req)
+
+    let result
+
+    await pool.query('SELECT * FROM students WHERE id = $1::integer',
+        [decoded_token["id"]])
+        .then((query_result) => {
+            result = {
+                name: query_result.rows[0].name,
+                enrolled_from: query_result.rows[0].enrolled_from,
+                enrolled_to: query_result.rows[0].enrolled_to
+            };
+        })
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(200).json(result)
+})
+
+app.post("/menu", auth, async (req, res) => {
+    const { year, week, monday, tuesday, wednesday, thursday } = req.body;
+
+    await pool.query('INSERT INTO menus (week, year, monday, tuesday, wednesday, thursday) VALUES ($1::integer, $2::integer, $3::varchar, $4::varchar, $5::varchar, $6::varchar)',
+        [week, year, monday, tuesday, wednesday, thursday])
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(201).send()
+})
+
+app.get("/menu/single", async (req, res) => {
+    const year = req.query.year
+    const week = req.query.week
+
+    let result
+
+    await pool.query('SELECT * FROM menus WHERE year = $1::integer and week = $2::integer',
+        [year, week])
+        .then((q_res) => {
+            result = q_res.rows[0]
+        })
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(200).json(result)
+})
+
+app.get("/menu/all", async (req, res) => {
+    let result
+
+    await pool.query('SELECT * FROM menus')
+        .then((q_res) => {
+            result = q_res.rows
+        })
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(200).json(result)
+})
+
+app.post("/student/enlistments", auth, async (req, res) => {
+    const { year, week, monday, tuesday, wednesday, thursday, friday } = req.body;
+    const decoded_token = decodeToken(req)
+
+    await pool.query('INSERT INTO enlistments (student_id, year, week, monday, tuesday, wednesday, thursday, friday) VALUES ($1::integer, $2::integer, $3::integer, $4::boolean, $5::boolean, $6::boolean, $7::boolean, $8::boolean)',
+        [decoded_token["id"], year, week, monday, tuesday, wednesday, thursday, friday])
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(201).send()
+})
+
+app.get("/student/enlistments", auth, async (req, res) => {
+    const decoded_token = decodeToken(req)
+
+    let result
+
+    await pool.query('SELECT * FROM enlistments WHERE student_id = $1::integer',
+        [decoded_token["id"]])
+        .then((q_res) => {
+            result = q_res.rows;
+        })
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(200).json(result)
+})
+
+app.get("/staff/enlistments", auth, async (req, res) => {
+
+})
+
+app.post("/staff/enrolled_number", auth, async (req, res) => {
+    
 })
 
 module.exports = app;

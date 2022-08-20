@@ -9,19 +9,21 @@ CREATE TABLE IF NOT EXISTS students (
 );
 
 CREATE TABLE IF NOT EXISTS menus (
-     week DATE,
+     week INT,
+     year INT,
      monday VARCHAR(255),
      tuesday VARCHAR(255),
      wednesday VARCHAR(255),
      thursday VARCHAR(255),
 
-     PRIMARY KEY(week)
+     PRIMARY KEY(year, week)
 );
 
 
 CREATE TABLE IF NOT EXISTS enlistments (
   student_id INT,
-  week DATE,
+  week INT,
+  year INT,
   monday BOOLEAN,
   tuesday BOOLEAN,
   wednesday BOOLEAN,
@@ -31,9 +33,18 @@ CREATE TABLE IF NOT EXISTS enlistments (
   FOREIGN KEY (student_id) REFERENCES students(id)
 	ON UPDATE CASCADE
 	ON DELETE CASCADE,
-  FOREIGN KEY (week) REFERENCES menus(week)
+  FOREIGN KEY (year, week) REFERENCES menus(year, week)
 	ON UPDATE CASCADE
 	ON DELETE CASCADE,
-  PRIMARY KEY(student_id, week)
+  PRIMARY KEY(student_id, year, week)
+);
+
+CREATE TABLE IF NOT EXISTS dietary_preferences (
+    student_id INT,
+
+    FOREIGN KEY (student_id) REFERENCES students(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    PRIMARY KEY(student_id)
 );
 
