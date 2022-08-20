@@ -1,32 +1,16 @@
-const mariadb = require('mariadb');
-const pool = mariadb.createPool({
-     host: 'hansenbergapp.dk.mysql', 
-     database: 'hansenbergapp_dkskolehjem_aftensmad_dev',
-     user:'hansenbergapp_dkskolehjem_aftensmad_dev', 
-     password: 'mariadb_dev',
-     connectionLimit: 5
-});
+const { Client } = require("pg")
 
-pool.getConnection()
-    .then(conn => {
-    
-      conn.query("SELECT 1 as val")
-        .then((rows) => {
-          console.log(rows); //[ {val: 1}, meta: ... ]
-          //Table must have been created before 
-          // " CREATE TABLE myTable (id int, val varchar(255)) "
-          return conn.query("INSERT INTO myTable value (?, ?)", [1, "mariadb"]);
-        })
-        .then((res) => {
-          console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
-          conn.end();
-        })
+exports.connect = () => {
+    new Client({
+        user: process.env.PGUSER,
+        host: process.env.PGHOST,
+        database: process.env.PGDATABASE,
+        password: process.env.PGPASSWORD,
+        port: process.env.PGPORT
+    }).connect()
+        .then(() => console.log('Connected to database'))
         .catch(err => {
-          //handle error
-          console.log(err); 
-          conn.end();
-        })
-        
-    }).catch(err => {
-      //not connected
-    });
+            console.error('Database connection failed', err.stack);
+            process.exit(1);
+        });
+}
