@@ -49,13 +49,6 @@ app.post("/student/register", async (req, res) => {
             process.env.TOKEN_KEY
         );
 
-        await pool.query('UPDATE students SET token = $1::varchar WHERE id = $2::integer',
-            [signed_token, id])
-            .catch((error) => {
-                console.error('Error executing query', error.stack);
-                return res.status(400).send()
-            })
-
         return res.status(201).json({token: signed_token})
 
     } catch (error) {
