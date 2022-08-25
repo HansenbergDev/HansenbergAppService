@@ -85,6 +85,10 @@ app.get("/student", auth, async (req, res) => {
     return res.status(200).json(result)
 })
 
+app.delete("/student", auth, async (req, res) => {
+    // TODO: Implement this
+})
+
 app.post("/student/enlistment", auth, async (req, res) => {
     const {year, week, monday, tuesday, wednesday, thursday, friday} = req.body;
     const decoded_token = decodeToken(req)
