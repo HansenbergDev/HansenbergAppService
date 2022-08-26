@@ -20,7 +20,9 @@ function decodeToken(req) {
     return jwt.verify(req.headers["x-access-token"], process.env.TOKEN_KEY);
 }
 
-app.post("/student/register", async (req, res) => {
+const api = '/api/1.0'
+
+app.post(api + "/student/register", async (req, res) => {
     try {
         const {name, enrolled_from, enrolled_to} = req.body;
 
@@ -56,7 +58,7 @@ app.post("/student/register", async (req, res) => {
     }
 })
 
-app.get("/student", auth, async (req, res) => {
+app.get(api + "/student", auth, async (req, res) => {
     const decoded_token = decodeToken(req)
 
     let result
@@ -78,11 +80,11 @@ app.get("/student", auth, async (req, res) => {
     return res.status(200).json(result)
 })
 
-app.delete("/student", auth, async (req, res) => {
+app.delete(api + "/student", auth, async (req, res) => {
     // TODO: Implement this
 })
 
-app.post("/student/enlistment", auth, async (req, res) => {
+app.post(api + "/student/enlistment", auth, async (req, res) => {
     const {year, week, monday, tuesday, wednesday, thursday, friday} = req.body;
     const decoded_token = decodeToken(req)
 
@@ -96,7 +98,7 @@ app.post("/student/enlistment", auth, async (req, res) => {
     return res.status(201).send()
 })
 
-app.patch('/student/enlistment', auth, async (req, res) => {
+app.patch(api + '/student/enlistment', auth, async (req, res) => {
     const {year, week, monday, tuesday, wednesday, thursday, friday} = req.body;
     const decoded_token = decodeToken(req)
 
@@ -110,7 +112,7 @@ app.patch('/student/enlistment', auth, async (req, res) => {
     return res.status(200).send()
 })
 
-app.get("/student/enlistment/all", auth, async (req, res) => {
+app.get(api + "/student/enlistment/all", auth, async (req, res) => {
     const decoded_token = decodeToken(req)
 
     let result
@@ -129,7 +131,7 @@ app.get("/student/enlistment/all", auth, async (req, res) => {
     return res.status(200).json(result)
 })
 
-app.get("/student/enlistment/single", auth, async (req, res) => {
+app.get(api + "/student/enlistment/single", auth, async (req, res) => {
     const decoded_token = decodeToken(req)
     const year = req.query.year
     const week = req.query.week
@@ -150,19 +152,24 @@ app.get("/student/enlistment/single", auth, async (req, res) => {
     return res.status(200).json(result)
 })
 
-app.get("/staff/enlistment", auth, async (req, res) => {
+app.get(api + "/staff/enlistment", auth, async (req, res) => {
+    const year = req.query.year
+    const week = req.query.week
+
+
+
     // TODO: Implement
 })
 
-app.post("/staff/enrolled_number", auth, async (req, res) => {
+app.post(api + "/staff/enrolled_number", auth, async (req, res) => {
     // TODO: Implement
 })
 
-app.get("/staff/enrolled_number", auth, async (req, res) => {
+app.get(api + "/staff/enrolled_number", auth, async (req, res) => {
     // TODO: Implement
 })
 
-app.post("/menu", auth, async (req, res) => {
+app.post(api + "/menu", auth, async (req, res) => {
     const {year, week, monday, tuesday, wednesday, thursday} = req.body;
 
     await pool.query('INSERT INTO menus (week, year, monday, tuesday, wednesday, thursday) VALUES ($1::integer, $2::integer, $3::varchar, $4::varchar, $5::varchar, $6::varchar)',
@@ -175,7 +182,7 @@ app.post("/menu", auth, async (req, res) => {
     return res.status(201).send()
 })
 
-app.get("/menu/single", async (req, res) => {
+app.get(api + "/menu/single", async (req, res) => {
     const year = req.query.year
     const week = req.query.week
 
@@ -194,7 +201,7 @@ app.get("/menu/single", async (req, res) => {
     return res.status(200).json(result)
 })
 
-app.get("/menu/all", async (req, res) => {
+app.get(api + "/menu/all", async (req, res) => {
     let result
 
     await pool.query('SELECT * FROM menus')
