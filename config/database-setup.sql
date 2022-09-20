@@ -32,18 +32,15 @@ CREATE TABLE IF NOT EXISTS enlistments (
   friday BOOLEAN,
   created_on TIMESTAMP,
 
-  FOREIGN KEY (student_id) REFERENCES students(id)
-	ON DELETE CASCADE,
-  FOREIGN KEY (year, week) REFERENCES menus(year, week)
-	ON DELETE CASCADE,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (year, week) REFERENCES menus(year, week) ON DELETE CASCADE,
   PRIMARY KEY(student_id, year, week)
 );
 
 CREATE TABLE IF NOT EXISTS dietary_preferences (
     student_id INT,
 
-    FOREIGN KEY (student_id) REFERENCES students(id)
-        ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     PRIMARY KEY(student_id)
 );
 
