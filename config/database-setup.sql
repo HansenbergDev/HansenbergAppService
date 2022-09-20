@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS students (
 	name VARCHAR(50),
 	enrolled_from DATE,
 	enrolled_to DATE,
-	registered_on TIMESTAMP,
-	
+	created_on TIMESTAMP,
+
 	PRIMARY KEY(id)
 );
 
@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS menus (
      tuesday VARCHAR(255),
      wednesday VARCHAR(255),
      thursday VARCHAR(255),
+     created_on TIMESTAMP,
 
      PRIMARY KEY(year, week)
 );
@@ -29,12 +30,11 @@ CREATE TABLE IF NOT EXISTS enlistments (
   wednesday BOOLEAN,
   thursday BOOLEAN,
   friday BOOLEAN,
+  created_on TIMESTAMP,
 
   FOREIGN KEY (student_id) REFERENCES students(id)
-	ON UPDATE CASCADE
 	ON DELETE CASCADE,
   FOREIGN KEY (year, week) REFERENCES menus(year, week)
-	ON UPDATE CASCADE
 	ON DELETE CASCADE,
   PRIMARY KEY(student_id, year, week)
 );
@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS dietary_preferences (
     student_id INT,
 
     FOREIGN KEY (student_id) REFERENCES students(id)
-        ON UPDATE CASCADE
         ON DELETE CASCADE,
     PRIMARY KEY(student_id)
 );

@@ -35,9 +35,10 @@ app.post(api + "/student/register", async (req, res) => {
         }
 
         let id;
+        let date = new Date()
 
-        await pool.query('INSERT INTO students (name, enrolled_from, enrolled_to, registered_on) VALUES ($1::varchar, $2::date, $3::date, $4::timestamp) RETURNING id',
-            [name, enrolled_from, enrolled_to, new Date()])
+        await pool.query('INSERT INTO students (name, enrolled_from, enrolled_to, created_on) VALUES ($1::varchar, $2::date, $3::date, $4::timestamp) RETURNING id',
+            [name, enrolled_from, enrolled_to, date])
             .then((result) => {
                 id = result.rows[0].id;
             })
@@ -47,7 +48,7 @@ app.post(api + "/student/register", async (req, res) => {
             })
 
         const signed_token = jwt.sign(
-            { id: id, stuff: Math.random() },
+            { id: id, date: date, stuff: Math.random() },
             process.env.TOKEN_KEY
         );
 
@@ -81,15 +82,25 @@ app.get(api + "/student", auth, async (req, res) => {
 })
 
 app.delete(api + "/student", auth, async (req, res) => {
-    // TODO: Implement this
+
+    const decoded_token = decodeToken(req)
+
+    await pool.query('DELETE FROM students WHERE id = $1::integer',
+        [decoded_token["id"]])
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(410).send()
 })
 
 app.post(api + "/student/enlistment", auth, async (req, res) => {
     const { year, week, monday, tuesday, wednesday, thursday, friday } = req.body;
     const decoded_token = decodeToken(req)
 
-    await pool.query('INSERT INTO enlistments (student_id, year, week, monday, tuesday, wednesday, thursday, friday) VALUES ($1::integer, $2::integer, $3::integer, $4::boolean, $5::boolean, $6::boolean, $7::boolean, $8::boolean)',
-        [decoded_token["id"], year, week, monday, tuesday, wednesday, thursday, friday])
+    await pool.query('INSERT INTO enlistments (student_id, year, week, monday, tuesday, wednesday, thursday, friday, created_on) VALUES ($1::integer, $2::integer, $3::integer, $4::boolean, $5::boolean, $6::boolean, $7::boolean, $8::boolean, $9::timestamp)',
+        [decoded_token["id"], year, week, monday, tuesday, wednesday, thursday, friday, new Date()])
         .catch((error) => {
             console.error('Error executing query', error.stack);
             return res.status(400).send()
@@ -170,8 +181,8 @@ app.get(api + "/staff/enrolled_number", auth, async (req, res) => {
 app.post(api + "/menu", auth, async (req, res) => {
     const { year, week, monday, tuesday, wednesday, thursday } = req.body;
 
-    await pool.query('INSERT INTO menus (week, year, monday, tuesday, wednesday, thursday) VALUES ($1::integer, $2::integer, $3::varchar, $4::varchar, $5::varchar, $6::varchar)',
-        [week, year, monday, tuesday, wednesday, thursday])
+    await pool.query('INSERT INTO menus (week, year, monday, tuesday, wednesday, thursday, created_on) VALUES ($1::integer, $2::integer, $3::varchar, $4::varchar, $5::varchar, $6::varchar, $7::timestamp)',
+        [week, year, monday, tuesday, wednesday, thursday, new Date()])
         .catch((error) => {
             console.error('Error executing query', error.stack);
             return res.status(400).send()
