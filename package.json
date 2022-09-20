@@ -1,5 +1,5 @@
 {
-  "name": "tilmeldingssystem-service",
+  "name": "hansenbergapp_service",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HansenbergDev/Tilmeldingssystem-Service.git"
+    "url": "git+https://github.com/HansenbergDev/HansenbergAppService.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/HansenbergDev/Tilmeldingssystem-Service/issues"
+    "url": "https://github.com/HansenbergDev/HansenbergAppService/issues"
   },
-  "homepage": "https://github.com/HansenbergDev/Tilmeldingssystem-Service#readme",
+  "homepage": "https://github.com/HansenbergDev/HansenbergAppService#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.0.1",
