@@ -20,7 +20,7 @@ function decodeToken(req) {
     return jwt.verify(req.headers["x-access-token"], process.env.TOKEN_KEY);
 }
 
-const api = process.env.API_BASE;
+const api = process.env.API_BASE
 
 app.post(api + "/student/register", async (req, res) => {
     try {
@@ -36,8 +36,8 @@ app.post(api + "/student/register", async (req, res) => {
 
         let id;
 
-        await pool.query('INSERT INTO students (name, enrolled_from, enrolled_to) VALUES ($1::varchar, $2::date, $3::date) RETURNING id',
-            [name, enrolled_from, enrolled_to])
+        await pool.query('INSERT INTO students (name, enrolled_from, enrolled_to, registered_on) VALUES ($1::varchar, $2::date, $3::date, $4::timestamp) RETURNING id',
+            [name, enrolled_from, enrolled_to, new Date()])
             .then((result) => {
                 id = result.rows[0].id;
             })

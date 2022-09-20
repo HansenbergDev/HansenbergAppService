@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS students (
 	name VARCHAR(50),
 	enrolled_from DATE,
 	enrolled_to DATE,
+	registered_on TIMESTAMP,
 	
 	PRIMARY KEY(id)
 );
