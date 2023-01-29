@@ -242,7 +242,7 @@ app.post(api + "/staff/login", async (req, res) => {
             const signed_token = jwt.sign(
                 { username: username, stuff: Math.random() },
                 process.env.ADMIN_TOKEN_KEY,
-                { expiresIn: "2h", }
+                { expiresIn: "12h", }
             );
 
             return res.status(200).json({ token: signed_token })
