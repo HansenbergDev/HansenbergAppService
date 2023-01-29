@@ -1,6 +1,12 @@
+DROP TABLE IF EXISTS students CASCADE;
+DROP TABLE IF EXISTS menus CASCADE;
+DROP TABLE IF EXISTS enlistments;
+DROP TABLE IF EXISTS dietary_preferences;
+DROP TABLE IF EXISTS admins;
+
 CREATE TABLE IF NOT EXISTS students (
 	id SERIAL NOT NULL,
-	name VARCHAR(50),
+	name VARCHAR,
 	enrolled_from DATE,
 	enrolled_to DATE,
 	created_on TIMESTAMP,
@@ -11,13 +17,20 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS menus (
      week INT,
      year INT,
-     monday VARCHAR(255),
-     tuesday VARCHAR(255),
-     wednesday VARCHAR(255),
-     thursday VARCHAR(255),
+     monday VARCHAR,
+     tuesday VARCHAR,
+     wednesday VARCHAR,
+     thursday VARCHAR,
      created_on TIMESTAMP,
 
      PRIMARY KEY(year, week)
+);
+
+CREATE TABLE IF NOT EXISTS admins (
+  username VARCHAR,
+  password VARCHAR,
+
+  PRIMARY KEY (username)
 );
 
 
