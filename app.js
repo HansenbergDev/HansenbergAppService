@@ -18,6 +18,13 @@ const pool = new Pool({
 
 app.use(express.json());
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,PUT,PATCH,POST,DELETE");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 function decodeStudentToken(req) {
     return jwt.verify(req.headers["x-access-token"], process.env.STUDENT_TOKEN_KEY);
 }
@@ -180,19 +187,19 @@ app.post(api + "/staff/register", admin_auth, async (req, res) => {
             return res.status(400).send("All input is required");
         }
 
-        let oldUserCheck
+        let existingUserCheck
 
         await pool.query('SELECT username FROM admins WHERE username = $1::varchar',
             [username])
             .then((q_res) => {
-                oldUserCheck = q_res.rows.length == 1
+                existingUserCheck = q_res.rows.length == 1
             })
             .catch((error) => {
                 console.error('Error executing query', error.stack);
                 return res.status(400).send();
             })
 
-        if (oldUserCheck) {
+        if (existingUserCheck) {
             return res.status(409).send("User already exists, please login");
         }
 
@@ -214,6 +221,7 @@ app.post(api + "/staff/register", admin_auth, async (req, res) => {
 })
 
 app.post(api + "/staff/login", async (req, res) => {
+    console.log("Login attempt!")
     try {
         const { username, password } = req.body;
 
@@ -317,6 +325,15 @@ app.get(api + "/menu/all", async (req, res) => {
         })
 
     return res.status(200).json(result)
+})
+
+
+app.post(api + "/student/tokenCheck", student_auth, async (req, res) => {
+    return res.status(200).send()
+})
+
+app.post(api + "/staff/tokenCheck", admin_auth, async (req, res) => {
+    return res.status(200).send()
 })
 
 module.exports = app;
