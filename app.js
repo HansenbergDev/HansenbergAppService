@@ -221,7 +221,6 @@ app.post(api + "/staff/register", admin_auth, async (req, res) => {
 })
 
 app.post(api + "/staff/login", async (req, res) => {
-    console.log("Login attempt!")
     try {
         const { username, password } = req.body;
 
