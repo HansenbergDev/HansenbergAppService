@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS menus CASCADE;
 DROP TABLE IF EXISTS enlistments;
 DROP TABLE IF EXISTS dietary_preferences;
 DROP TABLE IF EXISTS admins;
+DROP TABLE IF EXISTS enrollments;
 
 CREATE TABLE IF NOT EXISTS students (
 	id SERIAL NOT NULL,
@@ -48,6 +49,13 @@ CREATE TABLE IF NOT EXISTS enlistments (
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
   FOREIGN KEY (year, week) REFERENCES menus(year, week) ON DELETE CASCADE,
   PRIMARY KEY(student_id, year, week)
+);
+
+CREATE TABLE IF NOT EXISTS enrollments (
+  week INT,
+  year INT,
+  number_of_enrolled_students INT,
+  PRIMARY KEY(week, year)
 );
 
 CREATE TABLE IF NOT EXISTS dietary_preferences (

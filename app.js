@@ -113,6 +113,10 @@ app.post(api + "/student/enlistment", student_auth, async (req, res) => {
     const { year, week, monday, tuesday, wednesday, thursday, friday } = req.body;
     const decoded_token = decodeStudentToken(req)
 
+    if (!(year && week && monday && tuesday && wednesday && thursday && friday)) {
+        return res.status(400).send("All input is required");
+    }
+
     await pool.query('INSERT INTO enlistments (student_id, year, week, monday, tuesday, wednesday, thursday, friday, created_on) VALUES ($1::integer, $2::integer, $3::integer, $4::boolean, $5::boolean, $6::boolean, $7::boolean, $8::boolean, $9::timestamp)',
         [decoded_token["id"], year, week, monday, tuesday, wednesday, thursday, friday, new Date()])
         .catch((error) => {
@@ -126,6 +130,10 @@ app.post(api + "/student/enlistment", student_auth, async (req, res) => {
 app.patch(api + '/student/enlistment', student_auth, async (req, res) => {
     const { year, week, monday, tuesday, wednesday, thursday, friday } = req.body;
     const decoded_token = decodeStudentToken(req)
+
+    if (!(year && week && monday && tuesday && wednesday && thursday && friday)) {
+        return res.status(400).send("All input is required");
+    }
 
     await pool.query('UPDATE enlistments SET monday = $1::boolean, tuesday = $2::boolean, wednesday = $3::boolean, thursday = $4::boolean, friday = $5::boolean WHERE student_id = $6::integer and year = $7::integer and week = $8::integer',
         [monday, tuesday, wednesday, thursday, friday, decoded_token['id'], year, week])
@@ -264,23 +272,89 @@ app.post(api + "/staff/login", async (req, res) => {
     }
 })
 
-app.get(api + "/staff/enlistment", admin_auth, async (req, res) => {
+app.get(api + "/staff/enlistment/day", admin_auth, async (req, res) => {
+    const year = req.query.year
+    const week = req.query.week
+    const day = req.query.day
+
+    if (day != 'monday' && day != 'tuesday' && day != 'wednesday' && day != 'thursday' && day != 'friday') {
+        return res.status(400).send("'day' input should be either: 'monday', 'tuesday', 'wednesday', or 'thursday'");
+    }
+
+    let result
+
+    await pool.query('SELECT COUNT(*) FROM enlistments WHERE ' + day + ' = true AND week = $1::integer AND year = $2::integer',
+        [week, year])
+        .then((q_res) => {
+            result = q_res.rows[0]
+        })
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(200).json(result)
+})
+
+app.post(api + "/staff/enrolled_number/week", admin_auth, async (req, res) => {
+    const { week, year, number } = req.body;
+
+    if (!(week && year && number)) {
+        return res.status(400).send("All input is required");
+    }
+
+    await pool.query('INSERT INTO enrollments (week, year, number_of_enrolled_students) VALUES ($1::integer, $2::integer, $3::integer)',
+        [week, year, number])
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(201).send()
+})
+
+app.patch(api + "/staff/enrolled_number/week", admin_auth, async (req, res) => {
+    const { week, year, number } = req.body;
+
+    if (!(week && year && number)) {
+        return res.status(400).send("All input is required");
+    }
+
+    await pool.query('UPDATE enrollments SET number_of_enrolled_students = $1::integer WHERE week = $2::integer AND year = $3::integer',
+        [number, week, year])
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
+
+    return res.status(200).send()
+})
+
+app.get(api + "/staff/enrolled_number/week", admin_auth, async (req, res) => {
     const year = req.query.year
     const week = req.query.week
 
-    // TODO: Implement
-})
+    let result
 
-app.post(api + "/staff/enrolled_number", admin_auth, async (req, res) => {
-    // TODO: Implement
-})
+    await pool.query('SELECT number_of_enrolled_students FROM enrollments WHERE week = $1::integer AND year = $2::integer',
+        [week, year])
+        .then((q_res) => {
+            result = q_res.rows[0]
+        })
+        .catch((error) => {
+            console.error('Error executing query', error.stack);
+            return res.status(400).send()
+        })
 
-app.get(api + "/staff/enrolled_number", admin_auth, async (req, res) => {
-    // TODO: Implement
+    return res.status(200).json(result)
 })
 
 app.post(api + "/menu", admin_auth, async (req, res) => {
     const { year, week, monday, tuesday, wednesday, thursday } = req.body;
+
+    if (!(year && week && monday && tuesday && wednesday && thursday)) {
+        return res.status(400).send("All input is required");
+    }
 
     await pool.query('INSERT INTO menus (week, year, monday, tuesday, wednesday, thursday, created_on) VALUES ($1::integer, $2::integer, $3::varchar, $4::varchar, $5::varchar, $6::varchar, $7::timestamp)',
         [week, year, monday, tuesday, wednesday, thursday, new Date()])
